@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+
+.idea/
+.vscode/
+
+services/logistics-core/target/
+*.log
+
+.env
