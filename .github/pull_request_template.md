@@ -15,6 +15,11 @@ Describe what this PR changes and why.
 - Related PRs (if stacked):
 - Merge order (if stacked):
 
+## Reviewer Assignment
+
+- Requested reviewer(s):
+- Reviewer role target: [ ] Developer [ ] Architect [ ] Tester
+
 ## Review Guidance
 
 - Suggested review order (files/folders):
@@ -44,6 +49,7 @@ Describe what this PR changes and why.
 ## Checklist
 
 - [ ] One concern only (no mixed unrelated changes)
+- [ ] Reviewer(s) explicitly requested on this PR
 - [ ] Code follows development standards
 - [ ] Tests pass locally
 - [ ] No secrets, credentials, or debug leftovers

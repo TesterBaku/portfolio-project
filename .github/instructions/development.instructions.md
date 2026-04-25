@@ -258,19 +258,21 @@ See [testing.instructions.md](./testing.instructions.md) for details.
 2. **Implement one small slice** with unit and integration tests.
 3. **Run local tests** before opening PR.
 4. **Open PR to `develop`** with clear scope and validation notes.
-5. **CI gates run** (`develop-gates`): unit/integration checks must pass.
-6. **Independent review required** (see code-review.instructions.md).
-7. **Address feedback**, rerun tests, and repeat until green + approved.
-8. **Merge to `develop`**.
+5. **Appoint reviewer(s)** by requesting at least one reviewer on the PR.
+6. **CI gates run** (`develop-gates`, `reviewer-assigned`): tests must pass and reviewer must be assigned.
+7. **Independent review required** (see code-review.instructions.md).
+8. **Address feedback**, rerun tests, and repeat until green + approved.
+9. **Merge to `develop`**.
 
 ### Stage B: Promotion PR From `develop` To `main`
 
 1. **Open promotion PR** from `develop` to `main`.
-2. **CI promotion gates run** (`main-promotion-gates`) and source policy check (`main-source-policy`).
-3. **Run or confirm E2E coverage when needed** for critical user paths.
-4. **Independent review required**.
-5. **Address feedback**, rerun tests, and repeat until green + approved.
-6. **Merge to `main`** (direct pushes are blocked).
+2. **Appoint reviewer(s)** by requesting at least one reviewer on the PR.
+3. **CI promotion gates run** (`main-promotion-gates`), source policy check (`main-source-policy`), and reviewer assignment check (`reviewer-assigned`).
+4. **Run or confirm E2E coverage when needed** for critical user paths.
+5. **Independent review required**.
+6. **Address feedback**, rerun tests, and repeat until green + approved.
+7. **Merge to `main`** (direct pushes are blocked).
 
 ### Hotfix Path
 

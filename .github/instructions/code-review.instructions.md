@@ -26,6 +26,7 @@ Before requesting review, the author should verify:
 - [ ] PR title clearly describes the change
 - [ ] PR description explains the "why" and "what"
 - [ ] Related ticket/issue is linked
+- [ ] At least one reviewer is explicitly requested
 - [ ] All tests pass locally (`npm test`, `mvn test`, `pytest`, etc.)
 - [ ] No debug code, console.log, or commented-out code
 - [ ] Code follows style guide
