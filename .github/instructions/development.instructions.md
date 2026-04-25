@@ -252,6 +252,8 @@ See [testing.instructions.md](./testing.instructions.md) for details.
 4. **Link ticket** if using an issue tracker
 5. **Add description**: Explain what changed and why
 6. **Request review**: Assign reviewers (see code-review.instructions.md)
+  - Non-trivial PRs require one independent reviewer approval before merge.
+  - High-risk PRs (schema, auth/security, infra, CI/CD, dependency changes) require one independent approval and resolved conversations.
 7. **Address feedback**: Make changes and re-request review
 8. **Rebase and merge**: Use the `/manage-git-workflow` skill
 

@@ -20,6 +20,23 @@ This document defines the process and criteria for reviewing code changes on thi
 
 ## Review Process
 
+## Independent Reviewer Policy
+
+Default rule: all non-trivial PRs require at least one independent reviewer approval before merge.
+
+### Risk-Based Requirements
+
+- Low risk (docs, comments, tiny config-only changes): self-merge is allowed if checks pass.
+- Medium risk (service logic, API contract, database query behavior): one independent approval required.
+- High risk (schema migrations, auth/security, CI/CD, infra, dependency upgrades): one independent approval required and all conversations resolved.
+
+### Independence Rules
+
+- PR author cannot self-approve.
+- Last pusher should not be the final approver when possible.
+- If the PR has force-pushes after review, stale approvals must be dismissed and re-requested.
+- Prefer reviewer rotation across architecture, development, and testing perspectives over time.
+
 ### 1. PR Opening Checklist
 
 Before requesting review, the author should verify:

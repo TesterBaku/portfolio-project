@@ -1,0 +1,15 @@
+# Global fallback owner
+* @TesterBaku
+
+# Architecture and process files
+/.github/ @TesterBaku
+
+# Core service
+/services/logistics-core/ @TesterBaku
+
+# AI service
+/services/ai-assistant/ @TesterBaku
+
+# Database and infrastructure
+/database/ @TesterBaku
+/docker-compose.yml @TesterBaku
