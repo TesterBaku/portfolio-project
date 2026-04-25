@@ -15,6 +15,16 @@ Describe what this PR changes and why.
 - Related PRs (if stacked):
 - Merge order (if stacked):
 
+## Reviewer Assignment
+
+Default routing (pick the primary reviewer):
+- [ ] **@Senior Developer** — Feature slices, service logic, API code, CI/config (default for most PRs)
+- [ ] **@Architect** — Domain model changes, service boundary decisions, API contract design
+- [ ] **@Tester** — Test suite PRs, coverage strategy, quality gate changes
+
+Requested reviewer(s):
+Escalation needed: [ ] None [ ] Architect [ ] Tester
+
 ## Review Guidance
 
 - Suggested review order (files/folders):
@@ -44,6 +54,7 @@ Describe what this PR changes and why.
 ## Checklist
 
 - [ ] One concern only (no mixed unrelated changes)
+- [ ] Reviewer(s) explicitly requested on this PR
 - [ ] Code follows development standards
 - [ ] Tests pass locally
 - [ ] No secrets, credentials, or debug leftovers

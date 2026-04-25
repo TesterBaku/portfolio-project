@@ -11,8 +11,14 @@ This document defines the standards for writing code, structuring features, and 
 ## Branch Strategy
 
 ### Main Branches
-- **`main`**: Production-ready, always deployable. Protected branch. Changes via PR from `release/*` or `hotfix/*` only.
+- **`main`**: Production-ready, always deployable. Protected branch. Changes via PR from `develop` or `hotfix/*` only.
 - **`develop`**: Integration branch for features. Base branch for feature PRs. Should always be stable and buildable.
+
+### Main Merge Gate
+
+- Direct pushes to `main` are blocked.
+- Pull requests targeting `main` must originate from `develop` or `hotfix/*`.
+- This is enforced by branch protection plus required status checks.
 
 ### Feature Branches
 - **Pattern**: `feature/<ticket-id>-<short-description>`
@@ -246,14 +252,34 @@ See [testing.instructions.md](./testing.instructions.md) for details.
 
 ## Pull Request Process
 
-1. **Create branch** off `develop` with proper naming
-2. **Implement feature** with tests and documentation
-3. **Push to origin** and open PR
-4. **Link ticket** if using an issue tracker
-5. **Add description**: Explain what changed and why
-6. **Request review**: Assign reviewers (see code-review.instructions.md)
-7. **Address feedback**: Make changes and re-request review
-8. **Rebase and merge**: Use the `/manage-git-workflow` skill
+### Stage A: Feature Or Bug Slice To `develop`
+
+1. **Create branch** off `develop` with proper naming.
+2. **Implement one small slice** with unit and integration tests.
+3. **Run local tests** before opening PR.
+4. **Open PR to `develop`** with clear scope and validation notes.
+5. **Appoint reviewer(s)** by requesting at least one reviewer on the PR.
+6. **CI gates run** (`develop-gates`): tests must pass.
+7. **Independent review required** (see code-review.instructions.md).
+8. **Address feedback**, rerun tests, and repeat until green + approved.
+9. **Merge to `develop`**.
+
+### Stage B: Promotion PR From `develop` To `main`
+
+1. **Open promotion PR** from `develop` to `main`.
+2. **Appoint reviewer(s)** by requesting at least one reviewer on the PR.
+3. **CI promotion gates run** (`main-promotion-gates`) and source policy check (`main-source-policy`).
+4. **Run or confirm E2E coverage when needed** for critical user paths.
+5. **Independent review required**.
+6. **Address feedback**, rerun tests, and repeat until green + approved.
+7. **Merge to `main`** (direct pushes are blocked).
+
+### Hotfix Path
+
+1. Branch from `main` using `hotfix/*`.
+2. Fix and add tests.
+3. Open PR to `main`, pass checks, review, merge.
+4. Back-merge the hotfix into `develop` immediately.
 
 ## Incremental PR Policy (Default)
 
