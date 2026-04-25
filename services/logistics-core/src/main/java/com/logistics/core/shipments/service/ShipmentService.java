@@ -1,6 +1,7 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -31,5 +32,37 @@ public class ShipmentService {
 
     public List<Shipment> listShipmentsByOrderId(UUID orderId) {
         return shipmentRepository.findByOrderId(orderId);
+    }
+
+    public Shipment transitionShipmentStatus(UUID orderId, UUID shipmentId, ShipmentStatus targetStatus) {
+        Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
+                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+
+        ShipmentStatus currentStatus = shipment.getStatus();
+        if (!isTransitionAllowed(currentStatus, targetStatus)) {
+            throw new IllegalStateException(
+                    "Invalid shipment status transition: " + currentStatus + " -> " + targetStatus
+            );
+        }
+
+        shipment.setStatus(targetStatus);
+        return shipmentRepository.save(shipment);
+    }
+
+    private boolean isTransitionAllowed(ShipmentStatus currentStatus, ShipmentStatus targetStatus) {
+        if (currentStatus == targetStatus) {
+            return true;
+        }
+
+        return switch (currentStatus) {
+            case CREATED -> targetStatus == ShipmentStatus.IN_TRANSIT || targetStatus == ShipmentStatus.CANCELED;
+            case IN_TRANSIT -> targetStatus == ShipmentStatus.DELIVERED
+                    || targetStatus == ShipmentStatus.DELAYED
+                    || targetStatus == ShipmentStatus.CANCELED;
+            case DELAYED -> targetStatus == ShipmentStatus.IN_TRANSIT
+                    || targetStatus == ShipmentStatus.DELIVERED
+                    || targetStatus == ShipmentStatus.CANCELED;
+            case DELIVERED, CANCELED -> false;
+        };
     }
 }

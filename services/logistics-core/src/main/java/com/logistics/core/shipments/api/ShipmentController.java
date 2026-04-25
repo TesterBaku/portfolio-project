@@ -1,16 +1,19 @@
 package com.logistics.core.shipments.api;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.logistics.core.shipments.service.ShipmentService;
 
@@ -40,5 +43,22 @@ public class ShipmentController {
     @GetMapping
     public List<ShipmentResponse> listShipments(@PathVariable UUID orderId) {
         return shipmentService.listShipmentsByOrderId(orderId).stream().map(ShipmentResponse::from).toList();
+    }
+
+    @PatchMapping("/{shipmentId}/status")
+    public ShipmentResponse updateShipmentStatus(
+            @PathVariable UUID orderId,
+            @PathVariable UUID shipmentId,
+            @Valid @RequestBody UpdateShipmentStatusRequest request
+    ) {
+        try {
+            return ShipmentResponse.from(
+                shipmentService.transitionShipmentStatus(orderId, shipmentId, request.status())
+            );
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }

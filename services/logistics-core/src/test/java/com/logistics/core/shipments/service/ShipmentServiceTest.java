@@ -1,13 +1,17 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,5 +55,54 @@ class ShipmentServiceTest {
 
         assertEquals(expected, actual);
         verify(shipmentRepository).findByOrderId(orderId);
+    }
+
+    @Test
+    void test_should_transition_shipment_status_when_transition_is_allowed() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(shipmentRepository);
+        Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.CREATED);
+
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.save(any(Shipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Shipment updated = shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.IN_TRANSIT);
+
+        assertEquals(ShipmentStatus.IN_TRANSIT, updated.getStatus());
+        verify(shipmentRepository).save(shipment);
+    }
+
+    @Test
+    void test_should_throw_when_transition_is_not_allowed() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(shipmentRepository);
+        Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.CREATED);
+
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.DELIVERED)
+        );
+
+        assertEquals("Invalid shipment status transition: CREATED -> DELIVERED", ex.getMessage());
+    }
+
+    @Test
+    void test_should_throw_when_shipment_not_found_for_order() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(shipmentRepository);
+
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
+
+        NoSuchElementException ex = assertThrows(
+                NoSuchElementException.class,
+                () -> shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.IN_TRANSIT)
+        );
+
+        assertEquals("Shipment not found for order", ex.getMessage());
     }
 }
