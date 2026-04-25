@@ -252,14 +252,32 @@ See [testing.instructions.md](./testing.instructions.md) for details.
 
 ## Pull Request Process
 
-1. **Create branch** off `develop` with proper naming
-2. **Implement feature** with tests and documentation
-3. **Push to origin** and open PR
-4. **Link ticket** if using an issue tracker
-5. **Add description**: Explain what changed and why
-6. **Request review**: Assign reviewers (see code-review.instructions.md)
-7. **Address feedback**: Make changes and re-request review
-8. **Rebase and merge**: Use the `/manage-git-workflow` skill
+### Stage A: Feature Or Bug Slice To `develop`
+
+1. **Create branch** off `develop` with proper naming.
+2. **Implement one small slice** with unit and integration tests.
+3. **Run local tests** before opening PR.
+4. **Open PR to `develop`** with clear scope and validation notes.
+5. **CI gates run** (`develop-gates`): unit/integration checks must pass.
+6. **Independent review required** (see code-review.instructions.md).
+7. **Address feedback**, rerun tests, and repeat until green + approved.
+8. **Merge to `develop`**.
+
+### Stage B: Promotion PR From `develop` To `main`
+
+1. **Open promotion PR** from `develop` to `main`.
+2. **CI promotion gates run** (`main-promotion-gates`) and source policy check (`main-source-policy`).
+3. **Run or confirm E2E coverage when needed** for critical user paths.
+4. **Independent review required**.
+5. **Address feedback**, rerun tests, and repeat until green + approved.
+6. **Merge to `main`** (direct pushes are blocked).
+
+### Hotfix Path
+
+1. Branch from `main` using `hotfix/*`.
+2. Fix and add tests.
+3. Open PR to `main`, pass checks, review, merge.
+4. Back-merge the hotfix into `develop` immediately.
 
 ## Incremental PR Policy (Default)
 
