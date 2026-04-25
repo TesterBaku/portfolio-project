@@ -17,8 +17,13 @@ Describe what this PR changes and why.
 
 ## Reviewer Assignment
 
-- Requested reviewer(s):
-- Reviewer role target: [ ] Developer [ ] Architect [ ] Tester
+Default routing (pick the primary reviewer):
+- [ ] **@Senior Developer** — Feature slices, service logic, API code, CI/config (default for most PRs)
+- [ ] **@Architect** — Domain model changes, service boundary decisions, API contract design
+- [ ] **@Tester** — Test suite PRs, coverage strategy, quality gate changes
+
+Requested reviewer(s):
+Escalation needed: [ ] None [ ] Architect [ ] Tester
 
 ## Review Guidance
 
