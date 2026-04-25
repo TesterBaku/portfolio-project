@@ -1,0 +1,21 @@
+name: Main Branch Source Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  main-source-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch for main
+        run: |
+          echo "PR source branch: ${{ github.head_ref }}"
+          if [[ "${{ github.head_ref }}" == "develop" || "${{ github.head_ref }}" == hotfix/* ]]; then
+            echo "Allowed source branch for main."
+            exit 0
+          fi
+
+          echo "Only develop or hotfix/* branches can target main."
+          exit 1

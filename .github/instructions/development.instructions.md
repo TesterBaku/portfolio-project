@@ -11,8 +11,14 @@ This document defines the standards for writing code, structuring features, and 
 ## Branch Strategy
 
 ### Main Branches
-- **`main`**: Production-ready, always deployable. Protected branch. Changes via PR from `release/*` or `hotfix/*` only.
+- **`main`**: Production-ready, always deployable. Protected branch. Changes via PR from `develop` or `hotfix/*` only.
 - **`develop`**: Integration branch for features. Base branch for feature PRs. Should always be stable and buildable.
+
+### Main Merge Gate
+
+- Direct pushes to `main` are blocked.
+- Pull requests targeting `main` must originate from `develop` or `hotfix/*`.
+- This is enforced by branch protection plus required status checks.
 
 ### Feature Branches
 - **Pattern**: `feature/<ticket-id>-<short-description>`
