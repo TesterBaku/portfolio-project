@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
 import com.logistics.core.shipments.domain.Shipment;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.service.ShipmentService;
@@ -127,6 +128,57 @@ class ShipmentControllerTest {
                 .content("""
                     {
                       "status": "IN_TRANSIT"
+                    }
+                    """))
+                .andExpect(status().isNotFound());
+            }
+
+            @Test
+            void test_should_summarize_shipment_exception_for_order() throws Exception {
+            UUID orderId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+            UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+            when(shipmentService.summarizeShipmentException(
+                eq(orderId),
+                eq(shipmentId),
+                eq("WEATHER_DELAY"),
+                eq("Roads blocked")
+            )).thenReturn(new AiExceptionSummaryResponse(
+                "Shipment SHIP-101 delayed due to weather",
+                "Contact carrier and notify customer"
+            ));
+
+            mockMvc.perform(post("/api/orders/{orderId}/shipments/{shipmentId}/exception-summary", orderId, shipmentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "exceptionType": "WEATHER_DELAY",
+                      "operatorNotes": "Roads blocked"
+                    }
+                    """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.summary").value("Shipment SHIP-101 delayed due to weather"))
+                .andExpect(jsonPath("$.recommendedNextAction").value("Contact carrier and notify customer"));
+            }
+
+            @Test
+            void test_should_return_not_found_when_summarize_target_shipment_missing() throws Exception {
+            UUID orderId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+            UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+            when(shipmentService.summarizeShipmentException(
+                eq(orderId),
+                eq(shipmentId),
+                eq("WEATHER_DELAY"),
+                eq("Roads blocked")
+            )).thenThrow(new NoSuchElementException("Shipment not found for order"));
+
+            mockMvc.perform(post("/api/orders/{orderId}/shipments/{shipmentId}/exception-summary", orderId, shipmentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "exceptionType": "WEATHER_DELAY",
+                      "operatorNotes": "Roads blocked"
                     }
                     """))
                 .andExpect(status().isNotFound());
