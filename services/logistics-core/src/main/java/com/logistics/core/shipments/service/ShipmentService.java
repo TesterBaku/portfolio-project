@@ -6,6 +6,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.logistics.core.assistant.contract.AiExceptionSummaryRequest;
+import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
+import com.logistics.core.assistant.contract.AssistantSummaryClient;
 import com.logistics.core.shipments.domain.Shipment;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.persistence.ShipmentRepository;
@@ -14,9 +17,11 @@ import com.logistics.core.shipments.persistence.ShipmentRepository;
 public class ShipmentService {
 
     private final ShipmentRepository shipmentRepository;
+    private final AssistantSummaryClient assistantSummaryClient;
 
-    public ShipmentService(ShipmentRepository shipmentRepository) {
+    public ShipmentService(ShipmentRepository shipmentRepository, AssistantSummaryClient assistantSummaryClient) {
         this.shipmentRepository = shipmentRepository;
+        this.assistantSummaryClient = assistantSummaryClient;
     }
 
     public Shipment createShipment(UUID orderId, String origin, String destination) {
@@ -47,6 +52,25 @@ public class ShipmentService {
 
         shipment.setStatus(targetStatus);
         return shipmentRepository.save(shipment);
+    }
+
+    public AiExceptionSummaryResponse summarizeShipmentException(
+            UUID orderId,
+            UUID shipmentId,
+            String exceptionType,
+            String operatorNotes
+    ) {
+        Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
+                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+
+        AiExceptionSummaryRequest request = new AiExceptionSummaryRequest(
+                shipment.getId().toString(),
+                exceptionType,
+                shipment.getStatus().name(),
+                operatorNotes == null ? "" : operatorNotes
+        );
+
+        return assistantSummaryClient.summarizeException(request);
     }
 
     private boolean isTransitionAllowed(ShipmentStatus currentStatus, ShipmentStatus targetStatus) {

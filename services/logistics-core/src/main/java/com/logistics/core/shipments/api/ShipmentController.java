@@ -61,4 +61,27 @@ public class ShipmentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @PostMapping("/{shipmentId}/exception-summary")
+    public ShipmentExceptionSummaryResponse summarizeShipmentException(
+            @PathVariable UUID orderId,
+            @PathVariable UUID shipmentId,
+            @Valid @RequestBody SummarizeShipmentExceptionRequest request
+    ) {
+        try {
+            var summary = shipmentService.summarizeShipmentException(
+                    orderId,
+                    shipmentId,
+                    request.exceptionType(),
+                    request.operatorNotes()
+            );
+
+            return new ShipmentExceptionSummaryResponse(
+                    summary.summary(),
+                    summary.recommendedNextAction()
+            );
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
 }
