@@ -3,11 +3,13 @@ package com.logistics.core.shipments.api;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -71,6 +73,64 @@ class ShipmentControllerTest {
             .andExpect(jsonPath("$[0].origin").value("Baku"))
             .andExpect(jsonPath("$[0].destination").value("Ganja"));
     }
+
+            @Test
+            void test_should_update_shipment_status_for_order() throws Exception {
+            UUID orderId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+            UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+            Shipment shipment = shipment(shipmentId, orderId, "Baku", "Ganja");
+            shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+
+            when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.IN_TRANSIT)))
+                .thenReturn(shipment);
+
+            mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "status": "IN_TRANSIT"
+                    }
+                    """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(shipmentId.toString()))
+                .andExpect(jsonPath("$.status").value("IN_TRANSIT"));
+            }
+
+            @Test
+            void test_should_return_bad_request_when_transition_is_invalid() throws Exception {
+            UUID orderId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+            UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+            when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.DELIVERED)))
+                .thenThrow(new IllegalStateException("Invalid shipment status transition: CREATED -> DELIVERED"));
+
+            mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "status": "DELIVERED"
+                    }
+                    """))
+                .andExpect(status().isBadRequest());
+            }
+
+            @Test
+            void test_should_return_not_found_when_shipment_does_not_exist_for_order() throws Exception {
+            UUID orderId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+            UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+            when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.IN_TRANSIT)))
+                .thenThrow(new NoSuchElementException("Shipment not found for order"));
+
+            mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "status": "IN_TRANSIT"
+                    }
+                    """))
+                .andExpect(status().isNotFound());
+            }
 
     private Shipment shipment(UUID shipmentId, UUID orderId, String origin, String destination) {
         Shipment shipment = new Shipment(shipmentId, orderId, origin, destination, ShipmentStatus.CREATED);
