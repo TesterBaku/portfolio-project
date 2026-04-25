@@ -1,7 +1,7 @@
 ---
 name: "Code Review Instructions"
 description: "Standards for reviewing code, providing feedback, and approving changes. Use when: reviewing PRs, providing code feedback, or understanding approval criteria."
-applyTo: []
+applyTo: "services/**, database/**, .github/workflows/**, docker-compose.yml"
 ---
 
 # Code Review Standards
