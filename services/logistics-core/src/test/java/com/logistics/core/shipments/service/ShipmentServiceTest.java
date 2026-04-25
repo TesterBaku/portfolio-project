@@ -1,21 +1,21 @@
 package com.logistics.core.shipments.service;
 
-import com.logistics.core.shipments.domain.Shipment;
-import com.logistics.core.shipments.domain.ShipmentStatus;
-import com.logistics.core.shipments.persistence.ShipmentRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentStatus;
+import com.logistics.core.shipments.persistence.ShipmentRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ShipmentServiceTest {
