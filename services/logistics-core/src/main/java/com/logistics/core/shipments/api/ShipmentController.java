@@ -62,6 +62,18 @@ public class ShipmentController {
         }
     }
 
+    @GetMapping("/{shipmentId}/track")
+    public ShipmentTrackingResponse trackShipment(
+            @PathVariable UUID orderId,
+            @PathVariable UUID shipmentId
+    ) {
+        try {
+            return shipmentService.getShipmentTracking(shipmentId);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
     @PostMapping("/{shipmentId}/exception-summary")
     public ShipmentExceptionSummaryResponse summarizeShipmentException(
             @PathVariable UUID orderId,
