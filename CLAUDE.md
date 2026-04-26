@@ -42,7 +42,8 @@
 
 ## Task Management
 
-1. **Plan First:** Write plan to tasks/todo.md with checkable items
+0. **Pre-Chat Checklist:** Before starting work, review `.github/tasks/todo.md` for any pending items from prior sessions. Prioritize blocking or time-sensitive tasks.
+1. **Plan First:** Write plan to `.github/tasks/todo.md` with checkable items
 2. **Verify Plan:** Check in before starting implementation
 3. **Track Progress:** Mark items complete as you go
 4. **Explain Changes:** High-level summary at each step
