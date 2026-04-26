@@ -15,7 +15,7 @@
 - One task per subagent for focused execution
 
 ### 3. Self-Improvement Loop
-- After ANY correction from the user: update tasks/lessons.md with the pattern
+- After ANY correction from the user: update .github/tasks/lessons.md with the pattern
 - Write rules for yourself that prevent the same mistake
 - Ruthlessly iterate on these lessons until mistake rate drops
 - Review lessons at session start for relevant project
@@ -47,8 +47,8 @@
 2. **Verify Plan:** Check in before starting implementation
 3. **Track Progress:** Mark items complete as you go
 4. **Explain Changes:** High-level summary at each step
-5. **Document Results:** Add review section to tasks/todo.md
-6. **Capture Lessons:** Update tasks/lessons.md after corrections
+5. **Document Results:** Add review section to .github/tasks/todo.md
+6. **Capture Lessons:** Update .github/tasks/lessons.md after corrections
 
 ---
 
