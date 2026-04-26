@@ -1,10 +1,10 @@
 package com.logistics.core.support;
 
+import java.net.URI;
+
 import org.testcontainers.dockerclient.DockerClientProviderStrategy;
 import org.testcontainers.dockerclient.InvalidConfigurationException;
 import org.testcontainers.dockerclient.TransportConfig;
-
-import java.net.URI;
 
 /**
  * Testcontainers strategy for Docker Desktop 29.x on Windows.

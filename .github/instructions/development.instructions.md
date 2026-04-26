@@ -31,6 +31,16 @@ This document defines the standards for writing code, structuring features, and 
   - Include ticket ID if using an issue tracker
   - Keep description under 40 characters
 
+### Branch Cut Rule
+
+- Always cut new work branches from the latest `origin/develop`.
+- Required command sequence before starting any slice:
+  - `git fetch origin`
+  - `git checkout develop`
+  - `git pull --ff-only origin develop`
+  - `git checkout -b <feature-or-bugfix-branch>`
+- Do not start new work from `main`, stale local branches, or detached commits.
+
 ### Bug Fix Branches
 - **Pattern**: `bugfix/<ticket-id>-<short-description>`
 - **Example**: `bugfix/CARGO-456-order-status-race-condition`
@@ -254,7 +264,7 @@ See [testing.instructions.md](./testing.instructions.md) for details.
 
 ### Stage A: Feature Or Bug Slice To `develop`
 
-1. **Create branch** off `develop` with proper naming.
+1. **Create branch** off latest `origin/develop` with proper naming.
 2. **Implement one small slice** with unit and integration tests.
 3. **Run local tests** before opening PR.
 4. **Open PR to `develop`** with clear scope and validation notes.

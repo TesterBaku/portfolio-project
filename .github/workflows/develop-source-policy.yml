@@ -1,0 +1,25 @@
+name: Develop Branch Source Policy
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  develop-source-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch for develop
+        run: |
+          echo "PR source branch: ${{ github.head_ref }}"
+
+          if [[ "${{ github.head_ref }}" == feature/* || \
+                "${{ github.head_ref }}" == bugfix/* || \
+                "${{ github.head_ref }}" == chore/* || \
+                "${{ github.head_ref }}" == hotfix/* ]]; then
+            echo "Allowed source branch for develop."
+            exit 0
+          fi
+
+          echo "Only feature/*, bugfix/*, chore/*, or hotfix/* branches can target develop."
+          exit 1
