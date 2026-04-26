@@ -44,6 +44,7 @@ When assigned to review a PR:
 4. **Be constructive**: Provide actionable feedback and explanations.
 5. **Suggest improvements**: Point out opportunities for simplification or optimization.
 6. **Approve or request changes**: Use GitHub's review tools (Comment, Approve, Request Changes).
+7. **Run security workflow when applicable**: Use `/security-review` for PRs that touch auth/authz, untrusted input handling, workflows, Docker, or dependency changes.
 
 ### 3. Approval Criteria
 
@@ -142,6 +143,12 @@ After receiving feedback:
 - "This endpoint doesn't check `user.canApproveOrders()`. Add an authorization check."
 - "This SQL query is vulnerable to injection. Use a parameterized query or ORM."
 
+**When to run `/security-review`**:
+- PR modifies authentication, authorization, or role checks.
+- PR changes API request validation or any untrusted input path.
+- PR modifies `.github/workflows/**`, Docker runtime config, or dependency manifests.
+- PR adds new external integrations or executes shell commands with PR/user-controlled input.
+
 ### ✅ Performance
 
 **Good observations**:
@@ -220,6 +227,11 @@ Track these over time to improve code quality:
 - Code coverage (fail if <80% for changed code)
 - Security scanning (secrets, vulnerable dependencies)
 - Performance tests (fail if key queries/APIs exceed baseline)
+
+### Security Workflow
+
+- Use `/security-review` for security-sensitive PRs before approval.
+- Review output should include severity (Critical/High/Medium/Low), required tests, and explicit verdict.
 
 ### GitHub PR Template
 

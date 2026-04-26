@@ -14,6 +14,7 @@ This workspace uses specialized agents, consistent instructions, and reusable sk
    - `/design-architecture` — Build architecture diagrams and ADRs.
    - `/manage-git-workflow` — Branching, rebasing, and PR workflow.
    - `/implement-tests` — Test strategy, coverage, and automation.
+  - `/security-review` — Structured application and CI security review.
 
 3. **Development standards**: Consult the instructions files for expected standards:
    - [Development Instructions](.github/instructions/development.instructions.md)
@@ -64,6 +65,9 @@ Execute Git workflows: branching, rebasing, cherry-picking, and PR preparation. 
 
 ### `/implement-tests`
 Implement test suites: unit tests, integration tests, and E2E tests. Includes templates for test fixtures, parameterized tests, and coverage reporting.
+
+### `/security-review`
+Run a structured AppSec review for PRs affecting API boundaries, auth/authz, persistence, Docker, workflows, and dependency changes.
 
 ---
 
@@ -141,8 +145,9 @@ If you need guidance on a specific role or task:
 2. **Feature Development**: `@Developer: <your question>`
 3. **Code Review & PR Quality Gate**: `@Senior Developer: <your question>`
 4. **Testing & QA**: `@Tester: <your question>`
-5. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
-6. **Portable Agent Map**: see `AGENTS.md` for cross-runtime role definitions
+5. **Security Review**: `/security-review` with @Senior Developer or @Tester for merge gating on security-sensitive changes
+6. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
+7. **Portable Agent Map**: see `AGENTS.md` for cross-runtime role definitions
 
 ---
 
@@ -169,6 +174,8 @@ If you need guidance on a specific role or task:
     test-implementation/
       SKILL.md
       assets/
+    security-review/
+      SKILL.md
   copilot-instructions.md     # This file
 ```
 

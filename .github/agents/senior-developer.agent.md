@@ -38,6 +38,7 @@ Work through every PR in this order:
 - [ ] No SQL/command injection vectors (use parameterized queries, no string concatenation for SQL).
 - [ ] No unvalidated user inputs passed to sensitive operations.
 - [ ] Appropriate authorization checks on all API endpoints.
+- [ ] For security-sensitive PRs, run `/security-review` and include verdict in review notes.
 
 ### 4. Tests
 - [ ] Business logic has ≥80% branch coverage.
@@ -76,6 +77,7 @@ Work through every PR in this order:
 - **Design concern detected** (service boundary, API contract, data model change): Stop. Comment: "This needs Architect review before I can approve. Tagging @Architect."
 - **Test coverage insufficient**: Comment with specific gaps and tag @Tester for test strategy.
 - **Security issue detected**: Block approval immediately. Mark as "Request Changes" with explicit remediation steps.
+- **High-risk security surface touched** (auth, workflows, Docker, dependency chain): require `/security-review` before approval.
 
 ## Output Format
 
