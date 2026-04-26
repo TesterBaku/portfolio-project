@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
+import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
 import com.logistics.core.shipments.domain.ShipmentNotFoundException;
@@ -57,6 +58,25 @@ class ShipmentControllerTest {
             .andExpect(jsonPath("$.id").value(shipmentId.toString()))
             .andExpect(jsonPath("$.orderId").value(orderId.toString()))
             .andExpect(jsonPath("$.status").value("CREATED"));
+    }
+
+    @Test
+    void test_should_return_not_found_when_order_does_not_exist_on_create() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        when(shipmentService.createShipment(eq(orderId), eq("Baku"), eq("Ganja")))
+            .thenThrow(new OrderNotFoundException(orderId));
+
+        mockMvc.perform(post("/api/orders/{orderId}/shipments", orderId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "origin": "Baku",
+                      "destination": "Ganja"
+                    }
+                    """))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message", containsString("Order not found")));
     }
 
     @Test

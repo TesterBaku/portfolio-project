@@ -25,6 +25,7 @@ import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.domain.OrderStatus;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
 import com.logistics.core.shipments.domain.ShipmentNotFoundException;
@@ -51,6 +52,7 @@ class ShipmentServiceTest {
             orderRepository,
             assistantSummaryClient
         );
+        when(orderRepository.existsById(orderId)).thenReturn(true);
         when(shipmentRepository.save(any(Shipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Shipment created = shipmentService.createShipment(orderId, "Baku", "Ganja");
@@ -60,6 +62,24 @@ class ShipmentServiceTest {
         assertEquals("Baku", created.getOrigin());
         assertEquals("Ganja", created.getDestination());
         assertEquals(ShipmentStatus.CREATED, created.getStatus());
+    }
+
+    @Test
+    void test_should_throw_when_order_not_found_on_create() {
+        UUID orderId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
+        when(orderRepository.existsById(orderId)).thenReturn(false);
+
+        OrderNotFoundException ex = assertThrows(
+            OrderNotFoundException.class,
+            () -> shipmentService.createShipment(orderId, "Baku", "Ganja")
+        );
+
+        assertEquals("Order not found: " + orderId, ex.getMessage());
     }
 
     @Test
