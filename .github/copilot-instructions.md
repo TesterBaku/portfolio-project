@@ -7,6 +7,7 @@ This workspace uses specialized agents, consistent instructions, and reusable sk
 1. **Choosing your agent**: Type `/` in Copilot Chat to see available agents and skills.
    - Use **@Architect** for design decisions, ADRs, and system architecture.
    - Use **@Developer** for feature implementation, refactoring, and debugging.
+   - Use **@Senior Developer** for independent PR/code review and merge-readiness checks.
    - Use **@Tester** for test strategy, SDET work, and quality assurance.
 
 2. **Common workflows**: Several skills encapsulate best practices:
@@ -37,6 +38,13 @@ Specializes in feature implementation, debugging, refactoring, and code quality.
 - Code review and improvements
 - Performance optimization
 
+### @Senior Developer
+Specializes in independent PR review and quality gatekeeping. Use for:
+- Reviewing feature PRs for correctness and edge cases
+- Validating test coverage and merge readiness
+- Enforcing code quality and review standards
+- Escalating design concerns to @Architect and test strategy gaps to @Tester
+
 ### @Tester
 Specializes in test strategy, automation, and quality assurance. Use for:
 - Test design and coverage
@@ -66,6 +74,29 @@ Instructions are applied based on file patterns and provide context-specific gui
 - **development.instructions.md**: Applied to all feature code. Covers code style, naming, structure, and practices.
 - **code-review.instructions.md**: Applied during PR review. Covers review standards, safety checks, and approval criteria.
 - **testing.instructions.md**: Applied to test files. Covers test design, naming, fixture patterns, and coverage expectations.
+
+## VS Code Agent File Compatibility
+
+When editing `.agent.md` files in `.github/agents/`, use VS Code custom-agent compatible structure:
+
+- Keep supported keys in YAML frontmatter only (`name`, `description`, optional `model`, optional `tools`).
+- Put behavioral guidance in the Markdown body after frontmatter, not in an `instructions:` frontmatter key.
+- Do not use instruction-file keys like `applyTo` in `.agent.md` files.
+- For maximum Claude/Copilot/ChatGPT portability, default to minimal frontmatter (`name`, `description`) and keep runtime/tool preferences in plain Markdown guidance.
+
+Behavior note: omitting `model` and `tools` in portable `.agent.md` files may change runtime-specific execution behavior (model routing and tool availability) compared to strict Copilot-only configurations.
+
+Mitigation: treat portable agent files as role guidance, and apply strict tool/model enforcement in runtime-specific configuration layers when needed.
+
+If you see warnings like "instructions not supported", normalize the file to this format.
+
+## AI Customization Commit Policy
+
+AI-related project files are first-class project artifacts and must not be left as untracked clutter.
+
+- Always commit intentional changes to `.github/copilot-instructions.md`, `.github/agents/**`, `.github/instructions/**`, and `.github/skills/**`.
+- Do not leave temporary or untracked AI customization files in the workspace.
+- Keep AI customization commits small and focused (single concern per commit).
 
 ---
 
@@ -104,8 +135,10 @@ If you need guidance on a specific role or task:
 
 1. **Architecture & Design**: `@Architect: <your question>`
 2. **Feature Development**: `@Developer: <your question>`
-3. **Testing & QA**: `@Tester: <your question>`
-4. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
+3. **Code Review & PR Quality Gate**: `@Senior Developer: <your question>`
+4. **Testing & QA**: `@Tester: <your question>`
+5. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
+6. **Portable Agent Map**: see `AGENTS.md` for cross-runtime role definitions
 
 ---
 
@@ -116,6 +149,7 @@ If you need guidance on a specific role or task:
   agents/                     # Custom agents
     architect.agent.md
     developer.agent.md
+    senior-developer.agent.md
     tester-sdet.agent.md
   instructions/               # Auto-applied guidance
     development.instructions.md
