@@ -12,6 +12,7 @@ import com.logistics.core.assistant.contract.AssistantSummaryClient;
 import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
 import com.logistics.core.shipments.domain.ShipmentNotFoundException;
@@ -36,6 +37,9 @@ public class ShipmentService {
     }
 
     public Shipment createShipment(UUID orderId, String origin, String destination) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new OrderNotFoundException(orderId);
+        }
         Shipment shipment = new Shipment(
                 UUID.randomUUID(),
                 orderId,
