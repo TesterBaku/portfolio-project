@@ -67,6 +67,24 @@ Instructions are applied based on file patterns and provide context-specific gui
 - **code-review.instructions.md**: Applied during PR review. Covers review standards, safety checks, and approval criteria.
 - **testing.instructions.md**: Applied to test files. Covers test design, naming, fixture patterns, and coverage expectations.
 
+## VS Code Agent File Compatibility
+
+When editing `.agent.md` files in `.github/agents/`, use VS Code custom-agent compatible structure:
+
+- Keep supported keys in YAML frontmatter only (`name`, `description`, optional `model`, optional `tools`).
+- Put behavioral guidance in the Markdown body after frontmatter, not in an `instructions:` frontmatter key.
+- Do not use instruction-file keys like `applyTo` in `.agent.md` files.
+
+If you see warnings like "instructions not supported", normalize the file to this format.
+
+## AI Customization Commit Policy
+
+AI-related project files are first-class project artifacts and must not be left as untracked clutter.
+
+- Always commit intentional changes to `.github/copilot-instructions.md`, `.github/agents/**`, `.github/instructions/**`, and `.github/skills/**`.
+- Do not leave temporary or untracked AI customization files in the workspace.
+- Keep AI customization commits small and focused (single concern per commit).
+
 ---
 
 ## Project Standards
