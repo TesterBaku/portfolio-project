@@ -47,6 +47,34 @@ This document defines the standards for writing code, structuring features, and 
 - **Off**: `develop`
 - **Merge to**: `develop` (via PR with review)
 
+### Refactor Branches
+- **Pattern**: `refactor/<short-description>`
+- **Example**: `refactor/unify-shipment-error-contract`
+- **Off**: `develop`
+- **Merge to**: `develop` (via PR with review)
+- **Use for**: Code restructuring with no behavior change
+
+### Chore Branches
+- **Pattern**: `chore/<short-description>`
+- **Example**: `chore/update-branch-policy-prefixes`
+- **Off**: `develop`
+- **Merge to**: `develop` (via PR with review)
+- **Use for**: Tooling, config, dependency, and AI customization changes
+
+### CI Branches
+- **Pattern**: `ci/<short-description>`
+- **Example**: `ci/enable-integration-test-gate`
+- **Off**: `develop`
+- **Merge to**: `develop` (via PR with review)
+- **Use for**: CI/CD workflow and pipeline changes
+
+### Test Branches
+- **Pattern**: `test/<short-description>`
+- **Example**: `test/testcontainers-portability`
+- **Off**: `develop`
+- **Merge to**: `develop` (via PR with review)
+- **Use for**: Test strategy, coverage, and test infrastructure changes
+
 ### Hotfix Branches
 - **Pattern**: `hotfix/<short-description>`
 - **Example**: `hotfix/payment-gateway-timeout`
