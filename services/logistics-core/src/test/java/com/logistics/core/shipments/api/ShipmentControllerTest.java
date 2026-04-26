@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
+import com.logistics.core.shipments.domain.InvalidStatusTransitionException;
 import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
@@ -127,7 +127,7 @@ class ShipmentControllerTest {
             UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
             when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.DELIVERED)))
-                .thenThrow(new IllegalStateException("Invalid shipment status transition: CREATED -> DELIVERED"));
+                .thenThrow(new InvalidStatusTransitionException(ShipmentStatus.CREATED, ShipmentStatus.DELIVERED));
 
             mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +145,7 @@ class ShipmentControllerTest {
             UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
             when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.IN_TRANSIT)))
-                .thenThrow(new NoSuchElementException("Shipment not found for order"));
+                .thenThrow(new ShipmentNotFoundException(shipmentId));
 
             mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -195,7 +195,7 @@ class ShipmentControllerTest {
                 eq(shipmentId),
                 eq("WEATHER_DELAY"),
                 eq("Roads blocked")
-            )).thenThrow(new NoSuchElementException("Shipment not found for order"));
+            )).thenThrow(new ShipmentNotFoundException(shipmentId));
 
             mockMvc.perform(post("/api/orders/{orderId}/shipments/{shipmentId}/exception-summary", orderId, shipmentId)
                 .contentType(MediaType.APPLICATION_JSON)

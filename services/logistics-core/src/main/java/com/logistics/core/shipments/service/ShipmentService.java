@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import com.logistics.core.assistant.contract.AssistantSummaryClient;
 import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.InvalidStatusTransitionException;
 import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
@@ -56,13 +56,11 @@ public class ShipmentService {
 
     public Shipment transitionShipmentStatus(UUID orderId, UUID shipmentId, ShipmentStatus targetStatus) {
         Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
-                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
 
         ShipmentStatus currentStatus = shipment.getStatus();
         if (!isTransitionAllowed(currentStatus, targetStatus)) {
-            throw new IllegalStateException(
-                    "Invalid shipment status transition: " + currentStatus + " -> " + targetStatus
-            );
+            throw new InvalidStatusTransitionException(currentStatus, targetStatus);
         }
 
         shipment.setStatus(targetStatus);
@@ -76,7 +74,7 @@ public class ShipmentService {
             String operatorNotes
     ) {
         Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
-                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
 
         AiExceptionSummaryRequest request = new AiExceptionSummaryRequest(
                 shipment.getId().toString(),

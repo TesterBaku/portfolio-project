@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.api;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.logistics.core.shipments.service.ShipmentService;
 
@@ -51,15 +49,9 @@ public class ShipmentController {
             @PathVariable("shipmentId") UUID shipmentId,
             @Valid @RequestBody UpdateShipmentStatusRequest request
     ) {
-        try {
-            return ShipmentResponse.from(
-                shipmentService.transitionShipmentStatus(orderId, shipmentId, request.status())
-            );
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        } catch (IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
+        return ShipmentResponse.from(
+            shipmentService.transitionShipmentStatus(orderId, shipmentId, request.status())
+        );
     }
 
     @GetMapping("/{shipmentId}/track")
@@ -76,20 +68,15 @@ public class ShipmentController {
             @PathVariable UUID shipmentId,
             @Valid @RequestBody SummarizeShipmentExceptionRequest request
     ) {
-        try {
-            var summary = shipmentService.summarizeShipmentException(
-                    orderId,
-                    shipmentId,
-                    request.exceptionType(),
-                    request.operatorNotes()
-            );
-
-            return new ShipmentExceptionSummaryResponse(
-                    summary.summary(),
-                    summary.recommendedNextAction()
-            );
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+        var summary = shipmentService.summarizeShipmentException(
+                orderId,
+                shipmentId,
+                request.exceptionType(),
+                request.operatorNotes()
+        );
+        return new ShipmentExceptionSummaryResponse(
+                summary.summary(),
+                summary.recommendedNextAction()
+        );
     }
 }

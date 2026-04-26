@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +24,7 @@ import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.domain.OrderStatus;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.InvalidStatusTransitionException;
 import com.logistics.core.shipments.domain.OrderNotFoundException;
 import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
@@ -134,8 +134,8 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
 
-        IllegalStateException ex = assertThrows(
-                IllegalStateException.class,
+        InvalidStatusTransitionException ex = assertThrows(
+                InvalidStatusTransitionException.class,
                 () -> shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.DELIVERED)
         );
 
@@ -154,12 +154,12 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
-        NoSuchElementException ex = assertThrows(
-                NoSuchElementException.class,
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
                 () -> shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.IN_TRANSIT)
         );
 
-        assertEquals("Shipment not found for order", ex.getMessage());
+        assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
     }
 
     @Test
@@ -210,12 +210,12 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
-        NoSuchElementException ex = assertThrows(
-                NoSuchElementException.class,
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
                 () -> shipmentService.summarizeShipmentException(orderId, shipmentId, "WEATHER_DELAY", "")
         );
 
-        assertEquals("Shipment not found for order", ex.getMessage());
+        assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
     }
 
     @Test
