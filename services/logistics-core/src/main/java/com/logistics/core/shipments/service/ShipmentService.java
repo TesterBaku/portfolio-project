@@ -84,12 +84,12 @@ public class ShipmentService {
         return assistantSummaryClient.summarizeException(request);
     }
 
-    public ShipmentTrackingResponse getShipmentTracking(UUID shipmentId) {
-        Shipment shipment = shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
+        public ShipmentTrackingResponse getShipmentTracking(UUID orderId, UUID shipmentId) {
+        Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
+            .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
 
-        Order order = orderRepository.findById(shipment.getOrderId())
-                .orElseThrow(() -> new RelatedOrderNotFoundException(shipment.getOrderId()));
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RelatedOrderNotFoundException(orderId));
 
         return ShipmentTrackingResponse.from(shipment, order.getCustomerName());
     }

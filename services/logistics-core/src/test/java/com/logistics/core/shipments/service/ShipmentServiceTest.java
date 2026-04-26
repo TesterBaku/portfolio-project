@@ -210,10 +210,10 @@ class ShipmentServiceTest {
         Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.IN_TRANSIT);
         Order order = new Order(orderId, "ACME Corp", OrderStatus.IN_PROGRESS);
 
-        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
         when(orderRepository.findById(eq(orderId))).thenReturn(Optional.of(order));
 
-        ShipmentTrackingResponse response = shipmentService.getShipmentTracking(shipmentId);
+        ShipmentTrackingResponse response = shipmentService.getShipmentTracking(orderId, shipmentId);
 
         assertEquals(shipmentId, response.shipmentId());
         assertEquals(orderId, response.orderId());
@@ -227,6 +227,7 @@ class ShipmentServiceTest {
 
     @Test
     void test_should_throw_when_shipment_not_found_for_tracking() {
+        UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
         ShipmentService shipmentService = new ShipmentService(
                 shipmentRepository,
@@ -234,11 +235,11 @@ class ShipmentServiceTest {
                 assistantSummaryClient
         );
 
-        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.empty());
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
         ShipmentNotFoundException ex = assertThrows(
                 ShipmentNotFoundException.class,
-                () -> shipmentService.getShipmentTracking(shipmentId)
+            () -> shipmentService.getShipmentTracking(orderId, shipmentId)
         );
 
         assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
@@ -255,14 +256,34 @@ class ShipmentServiceTest {
         );
         Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.IN_TRANSIT);
 
-        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
         when(orderRepository.findById(eq(orderId))).thenReturn(Optional.empty());
 
         RelatedOrderNotFoundException ex = assertThrows(
                 RelatedOrderNotFoundException.class,
-                () -> shipmentService.getShipmentTracking(shipmentId)
+            () -> shipmentService.getShipmentTracking(orderId, shipmentId)
         );
 
         assertEquals("Related order not found: " + orderId, ex.getMessage());
     }
+
+        @Test
+        void test_should_throw_when_shipment_does_not_belong_to_order_for_tracking() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
+
+        when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
+
+        ShipmentNotFoundException ex = assertThrows(
+            ShipmentNotFoundException.class,
+            () -> shipmentService.getShipmentTracking(orderId, shipmentId)
+        );
+
+        assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
+        }
 }

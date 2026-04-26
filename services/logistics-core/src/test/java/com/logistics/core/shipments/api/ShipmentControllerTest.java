@@ -205,7 +205,7 @@ class ShipmentControllerTest {
                     List.of(new TrackingEventResponse(ShipmentStatus.IN_TRANSIT, Instant.parse("2026-04-25T11:00:00Z")))
                 );
 
-                when(shipmentService.getShipmentTracking(eq(shipmentId))).thenReturn(trackingResponse);
+                when(shipmentService.getShipmentTracking(eq(orderId), eq(shipmentId))).thenReturn(trackingResponse);
 
                 mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
                     .andExpect(status().isOk())
@@ -215,6 +215,9 @@ class ShipmentControllerTest {
                     .andExpect(jsonPath("$.origin").value("Baku"))
                     .andExpect(jsonPath("$.destination").value("Ganja"))
                     .andExpect(jsonPath("$.currentStatus").value("IN_TRANSIT"))
+                    .andExpect(jsonPath("$.createdAt").value("2026-04-25T10:00:00Z"))
+                    .andExpect(jsonPath("$.updatedAt").value("2026-04-25T11:00:00Z"))
+                    .andExpect(jsonPath("$.events[0].timestamp").value("2026-04-25T11:00:00Z"))
                     .andExpect(jsonPath("$.events[0].status").value("IN_TRANSIT"));
                 }
 
@@ -223,7 +226,7 @@ class ShipmentControllerTest {
                 UUID orderId = UUID.randomUUID();
                 UUID shipmentId = UUID.randomUUID();
 
-                when(shipmentService.getShipmentTracking(eq(shipmentId)))
+                when(shipmentService.getShipmentTracking(eq(orderId), eq(shipmentId)))
                     .thenThrow(new ShipmentNotFoundException(shipmentId));
 
                 mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
@@ -236,12 +239,25 @@ class ShipmentControllerTest {
                 UUID orderId = UUID.randomUUID();
                 UUID shipmentId = UUID.randomUUID();
 
-                when(shipmentService.getShipmentTracking(eq(shipmentId)))
+                when(shipmentService.getShipmentTracking(eq(orderId), eq(shipmentId)))
                     .thenThrow(new RelatedOrderNotFoundException(orderId));
 
                 mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.message", containsString("Related order not found")));
+                }
+
+                @Test
+                void test_should_return_not_found_when_tracking_shipment_does_not_belong_to_order() throws Exception {
+                UUID orderId = UUID.randomUUID();
+                UUID shipmentId = UUID.randomUUID();
+
+                when(shipmentService.getShipmentTracking(eq(orderId), eq(shipmentId)))
+                    .thenThrow(new ShipmentNotFoundException(shipmentId));
+
+                mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message", containsString("Shipment not found")));
                 }
 
     private Shipment shipment(UUID shipmentId, UUID orderId, String origin, String destination) {

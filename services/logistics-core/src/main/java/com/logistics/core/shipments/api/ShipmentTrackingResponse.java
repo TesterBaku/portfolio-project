@@ -2,7 +2,7 @@ package com.logistics.core.shipments.api;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +44,6 @@ public record ShipmentTrackingResponse(
             return null;
         }
 
-        return value.atZone(ZoneId.systemDefault()).toInstant();
+        return value.atOffset(ZoneOffset.UTC).toInstant();
     }
 }

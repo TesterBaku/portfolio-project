@@ -67,7 +67,7 @@ public class ShipmentController {
             @PathVariable("orderId") UUID orderId,
             @PathVariable("shipmentId") UUID shipmentId
     ) {
-        return shipmentService.getShipmentTracking(shipmentId);
+        return shipmentService.getShipmentTracking(orderId, shipmentId);
     }
 
     @PostMapping("/{shipmentId}/exception-summary")
