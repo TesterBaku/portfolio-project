@@ -33,15 +33,15 @@ Escalation needed: [ ] None [ ] Architect [ ] Tester
 
 ## Documentation Impact
 
-> **Required (not optional) if this PR touches:** workflow files (`*.yml`), branch/policy config, `copilot-instructions.md`, `CLAUDE.md`, agent or instruction files (`.github/agents/**`, `.github/instructions/**`), or any file that defines a convention documented elsewhere.
+> **Required (not optional) if this PR touches:** `.github/workflows/*.yml`, `.github/copilot-instructions.md`, `CLAUDE.md`, `.github/agents/**`, `.github/instructions/**`, `.github/skills/**`, or any file that documents a project convention (branch names, commit types, naming rules).
 
-- [ ] No documentation impact (explain why below if non-obvious)
-- [ ] `development.instructions.md` updated
-- [ ] `copilot-instructions.md` updated
+- [ ] No documentation impact
+- [ ] `.github/instructions/development.instructions.md` updated
+- [ ] `.github/copilot-instructions.md` updated
 - [ ] `CLAUDE.md` updated
 - [ ] Other doc updated:
 
-Notes (required if "no impact" is checked):
+Notes (required if "no impact" is checked — name each trigger file type considered and why it does not apply):
 
 ## Validation
 
