@@ -1,5 +1,7 @@
 package com.logistics.core.shipments.api;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,8 +10,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +24,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.service.ShipmentService;
 
@@ -121,7 +127,7 @@ class ShipmentControllerTest {
             UUID shipmentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
             when(shipmentService.transitionShipmentStatus(eq(orderId), eq(shipmentId), eq(ShipmentStatus.IN_TRANSIT)))
-                .thenThrow(new NoSuchElementException("Shipment not found for order"));
+                .thenThrow(new ShipmentNotFoundException(shipmentId, orderId));
 
             mockMvc.perform(patch("/api/orders/{orderId}/shipments/{shipmentId}/status", orderId, shipmentId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +177,7 @@ class ShipmentControllerTest {
                 eq(shipmentId),
                 eq("WEATHER_DELAY"),
                 eq("Roads blocked")
-            )).thenThrow(new NoSuchElementException("Shipment not found for order"));
+            )).thenThrow(new ShipmentNotFoundException(shipmentId, orderId));
 
             mockMvc.perform(post("/api/orders/{orderId}/shipments/{shipmentId}/exception-summary", orderId, shipmentId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -192,5 +198,138 @@ class ShipmentControllerTest {
         shipment.setDestination(destination);
         shipment.setStatus(ShipmentStatus.CREATED);
         return shipment;
+    }
+
+    @Test
+    void test_should_track_shipment_and_return_tracking_response() throws Exception {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        Instant now = Instant.parse("2024-04-25T10:30:00Z");
+
+        ShipmentTrackingResponse mockResponse = new ShipmentTrackingResponse(
+            shipmentId,
+            orderId,
+            "John Doe",
+            "New York",
+            "Los Angeles",
+            ShipmentStatus.IN_TRANSIT,
+            now,
+            now,
+            List.of(new TrackingEventResponse(ShipmentStatus.IN_TRANSIT, now))
+        );
+
+        when(shipmentService.getShipmentTracking(shipmentId)).thenReturn(mockResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.shipmentId").value(shipmentId.toString()))
+            .andExpect(jsonPath("$.orderId").value(orderId.toString()))
+            .andExpect(jsonPath("$.customerName").value("John Doe"))
+            .andExpect(jsonPath("$.origin").value("New York"))
+            .andExpect(jsonPath("$.destination").value("Los Angeles"))
+            .andExpect(jsonPath("$.currentStatus").value("IN_TRANSIT"))
+            .andExpect(jsonPath("$.createdAt").value("2024-04-25T10:30:00Z"))
+            .andExpect(jsonPath("$.updatedAt").value("2024-04-25T10:30:00Z"))
+            .andExpect(jsonPath("$.events", hasSize(1)))
+            .andExpect(jsonPath("$.events[0].status").value("IN_TRANSIT"))
+            .andExpect(jsonPath("$.events[0].timestamp").value("2024-04-25T10:30:00Z"));
+    }
+
+    @Test
+    void test_should_return_not_found_when_tracking_shipment_not_found() throws Exception {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+
+        when(shipmentService.getShipmentTracking(shipmentId))
+            .thenThrow(new ShipmentNotFoundException(shipmentId));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message", containsString("Shipment not found")));
+    }
+
+    @Test
+    void test_should_return_not_found_when_tracking_related_order_not_found() throws Exception {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+
+        when(shipmentService.getShipmentTracking(shipmentId))
+            .thenThrow(new RelatedOrderNotFoundException(orderId));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message", containsString("Related order not found")));
+    }
+
+    @Test
+    void test_should_serialize_instant_in_iso8601_format_for_tracking() throws Exception {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        Instant fixedInstant = Instant.parse("2024-04-25T15:45:30.123Z");
+
+        ShipmentTrackingResponse mockResponse = new ShipmentTrackingResponse(
+            shipmentId,
+            orderId,
+            "Jane Smith",
+            "Boston",
+            "Miami",
+            ShipmentStatus.CREATED,
+            fixedInstant,
+            fixedInstant,
+            List.of(new TrackingEventResponse(ShipmentStatus.CREATED, fixedInstant))
+        );
+
+        when(shipmentService.getShipmentTracking(shipmentId)).thenReturn(mockResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.createdAt").value("2024-04-25T15:45:30.123Z"))
+            .andExpect(jsonPath("$.updatedAt").value("2024-04-25T15:45:30.123Z"))
+            .andExpect(jsonPath("$.events[0].timestamp").value("2024-04-25T15:45:30.123Z"));
+    }
+
+    @Test
+    void test_should_include_all_required_fields_in_tracking_response() throws Exception {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        Instant now = Instant.now();
+
+        ShipmentTrackingResponse mockResponse = new ShipmentTrackingResponse(
+            shipmentId,
+            orderId,
+            "Customer Name",
+            "Origin",
+            "Destination",
+            ShipmentStatus.DELIVERED,
+            now,
+            now,
+            List.of(new TrackingEventResponse(ShipmentStatus.DELIVERED, now))
+        );
+
+        when(shipmentService.getShipmentTracking(shipmentId)).thenReturn(mockResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/shipments/{shipmentId}/track", orderId, shipmentId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.shipmentId").exists())
+            .andExpect(jsonPath("$.orderId").exists())
+            .andExpect(jsonPath("$.customerName").exists())
+            .andExpect(jsonPath("$.origin").exists())
+            .andExpect(jsonPath("$.destination").exists())
+            .andExpect(jsonPath("$.currentStatus").exists())
+            .andExpect(jsonPath("$.createdAt").exists())
+            .andExpect(jsonPath("$.updatedAt").exists())
+            .andExpect(jsonPath("$.events").exists())
+            .andExpect(jsonPath("$.events[0].status").exists())
+            .andExpect(jsonPath("$.events[0].timestamp").exists());
     }
 }

@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,7 +24,9 @@ import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.domain.OrderStatus;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.persistence.ShipmentRepository;
 
@@ -112,12 +113,12 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
-        NoSuchElementException ex = assertThrows(
-                NoSuchElementException.class,
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
                 () -> shipmentService.transitionShipmentStatus(orderId, shipmentId, ShipmentStatus.IN_TRANSIT)
         );
 
-        assertEquals("Shipment not found for order", ex.getMessage());
+        assertEquals("Shipment not found for shipment ID: " + shipmentId + ", order ID: " + orderId, ex.getMessage());
     }
 
     @Test
@@ -160,12 +161,12 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
-        NoSuchElementException ex = assertThrows(
-                NoSuchElementException.class,
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
                 () -> shipmentService.summarizeShipmentException(orderId, shipmentId, "WEATHER_DELAY", "")
         );
 
-        assertEquals("Shipment not found for order", ex.getMessage());
+        assertEquals("Shipment not found for shipment ID: " + shipmentId + ", order ID: " + orderId, ex.getMessage());
     }
 
     @Test
@@ -199,11 +200,29 @@ class ShipmentServiceTest {
 
         when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.empty());
 
-        NoSuchElementException ex = assertThrows(
-                NoSuchElementException.class,
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
                 () -> shipmentService.getShipmentTracking(shipmentId)
         );
 
-        assertEquals("Shipment not found", ex.getMessage());
+        assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
     }
-}
+
+    @Test
+    void test_should_throw_when_related_order_not_found_for_tracking() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(shipmentRepository, orderRepository, assistantSummaryClient);
+        
+        Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.IN_TRANSIT);
+
+        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.of(shipment));
+        when(orderRepository.findById(eq(orderId))).thenReturn(Optional.empty());
+
+        RelatedOrderNotFoundException ex = assertThrows(
+                RelatedOrderNotFoundException.class,
+                () -> shipmentService.getShipmentTracking(shipmentId)
+        );
+
+        assertEquals("Related order not found: " + orderId, ex.getMessage());
+    }

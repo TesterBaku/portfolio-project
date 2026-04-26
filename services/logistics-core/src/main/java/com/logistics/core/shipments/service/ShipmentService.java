@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -12,7 +11,9 @@ import com.logistics.core.assistant.contract.AssistantSummaryClient;
 import com.logistics.core.orders.domain.Order;
 import com.logistics.core.orders.persistence.OrderRepository;
 import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.persistence.ShipmentRepository;
 
@@ -46,7 +47,7 @@ public class ShipmentService {
 
     public Shipment transitionShipmentStatus(UUID orderId, UUID shipmentId, ShipmentStatus targetStatus) {
         Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
-                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId, orderId));
 
         ShipmentStatus currentStatus = shipment.getStatus();
         if (!isTransitionAllowed(currentStatus, targetStatus)) {
@@ -61,13 +62,13 @@ public class ShipmentService {
 
     public Shipment getShipmentById(UUID shipmentId) {
         return shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new NoSuchElementException("Shipment not found"));
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
     }
 
     public ShipmentTrackingResponse getShipmentTracking(UUID shipmentId) {
         Shipment shipment = getShipmentById(shipmentId);
         Order order = orderRepository.findById(shipment.getOrderId())
-                .orElseThrow(() -> new NoSuchElementException("Order not found for shipment"));
+                .orElseThrow(() -> new RelatedOrderNotFoundException(shipment.getOrderId()));
 
         return ShipmentTrackingResponse.from(shipment, order.getCustomerName());
     }
@@ -79,7 +80,7 @@ public class ShipmentService {
             String operatorNotes
     ) {
         Shipment shipment = shipmentRepository.findByIdAndOrderId(shipmentId, orderId)
-                .orElseThrow(() -> new NoSuchElementException("Shipment not found for order"));
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId, orderId));
 
         AiExceptionSummaryRequest request = new AiExceptionSummaryRequest(
                 shipment.getId().toString(),

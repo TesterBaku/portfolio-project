@@ -1,7 +1,6 @@
 package com.logistics.core.shipments.api;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.service.ShipmentService;
 
 import jakarta.validation.Valid;
@@ -47,15 +48,15 @@ public class ShipmentController {
 
     @PatchMapping("/{shipmentId}/status")
     public ShipmentResponse updateShipmentStatus(
-            @PathVariable UUID orderId,
-            @PathVariable UUID shipmentId,
+            @PathVariable("orderId") UUID orderId,
+            @PathVariable("shipmentId") UUID shipmentId,
             @Valid @RequestBody UpdateShipmentStatusRequest request
     ) {
         try {
             return ShipmentResponse.from(
                 shipmentService.transitionShipmentStatus(orderId, shipmentId, request.status())
             );
-        } catch (NoSuchElementException e) {
+        } catch (ShipmentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -64,20 +65,22 @@ public class ShipmentController {
 
     @GetMapping("/{shipmentId}/track")
     public ShipmentTrackingResponse trackShipment(
-            @PathVariable UUID orderId,
-            @PathVariable UUID shipmentId
+            @PathVariable("orderId") UUID orderId,
+            @PathVariable("shipmentId") UUID shipmentId
     ) {
         try {
             return shipmentService.getShipmentTracking(shipmentId);
-        } catch (NoSuchElementException e) {
+        } catch (ShipmentNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (RelatedOrderNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
     @PostMapping("/{shipmentId}/exception-summary")
     public ShipmentExceptionSummaryResponse summarizeShipmentException(
-            @PathVariable UUID orderId,
-            @PathVariable UUID shipmentId,
+            @PathVariable("orderId") UUID orderId,
+            @PathVariable("shipmentId") UUID shipmentId,
             @Valid @RequestBody SummarizeShipmentExceptionRequest request
     ) {
         try {
@@ -92,7 +95,7 @@ public class ShipmentController {
                     summary.summary(),
                     summary.recommendedNextAction()
             );
-        } catch (NoSuchElementException e) {
+        } catch (ShipmentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
