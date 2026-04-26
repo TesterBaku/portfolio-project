@@ -1,7 +1,6 @@
 ---
 name: "Senior Developer"
 description: "Independent code reviewer and quality gatekeeper. Use when: reviewing PRs for feature implementation, business logic, service code, CI/config changes, or any code that does not require architectural design decisions. The default reviewer for all feature PRs. Escalates to Architect for design concerns and to Tester for test strategy gaps."
-model: "GPT-5.3 (copilot)"
 tools:
   - read_file
   - semantic_search
