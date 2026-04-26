@@ -19,3 +19,7 @@ Use for test strategy, test implementation, CI quality gates, and reliability/fl
 - Keep frontmatter minimal when present: `name`, `description`.
 - Avoid tool-specific config keys unless strictly required by one runtime.
 - Place platform-specific details in local docs (for example, `.github/copilot-instructions.md`) rather than in shared role definitions.
+
+## Behavior Note
+- Removing runtime-specific tool/model keys improves portability but can change runtime behavior where those keys are enforced.
+- Use platform-specific config for strict tool/model guardrails, and keep this file focused on portable role intent.

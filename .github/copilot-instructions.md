@@ -84,6 +84,10 @@ When editing `.agent.md` files in `.github/agents/`, use VS Code custom-agent co
 - Do not use instruction-file keys like `applyTo` in `.agent.md` files.
 - For maximum Claude/Copilot/ChatGPT portability, default to minimal frontmatter (`name`, `description`) and keep runtime/tool preferences in plain Markdown guidance.
 
+Behavior note: omitting `model` and `tools` in portable `.agent.md` files may change runtime-specific execution behavior (model routing and tool availability) compared to strict Copilot-only configurations.
+
+Mitigation: treat portable agent files as role guidance, and apply strict tool/model enforcement in runtime-specific configuration layers when needed.
+
 If you see warnings like "instructions not supported", normalize the file to this format.
 
 ## AI Customization Commit Policy
@@ -134,6 +138,7 @@ If you need guidance on a specific role or task:
 3. **Code Review & PR Quality Gate**: `@Senior Developer: <your question>`
 4. **Testing & QA**: `@Tester: <your question>`
 5. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
+6. **Portable Agent Map**: see `AGENTS.md` for cross-runtime role definitions
 
 ---
 
