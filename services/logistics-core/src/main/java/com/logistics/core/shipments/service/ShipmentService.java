@@ -9,7 +9,12 @@ import org.springframework.stereotype.Service;
 import com.logistics.core.assistant.contract.AiExceptionSummaryRequest;
 import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
 import com.logistics.core.assistant.contract.AssistantSummaryClient;
+import com.logistics.core.orders.domain.Order;
+import com.logistics.core.orders.persistence.OrderRepository;
+import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.persistence.ShipmentRepository;
 
@@ -17,10 +22,16 @@ import com.logistics.core.shipments.persistence.ShipmentRepository;
 public class ShipmentService {
 
     private final ShipmentRepository shipmentRepository;
+    private final OrderRepository orderRepository;
     private final AssistantSummaryClient assistantSummaryClient;
 
-    public ShipmentService(ShipmentRepository shipmentRepository, AssistantSummaryClient assistantSummaryClient) {
+    public ShipmentService(
+            ShipmentRepository shipmentRepository,
+            OrderRepository orderRepository,
+            AssistantSummaryClient assistantSummaryClient
+    ) {
         this.shipmentRepository = shipmentRepository;
+        this.orderRepository = orderRepository;
         this.assistantSummaryClient = assistantSummaryClient;
     }
 
@@ -71,6 +82,16 @@ public class ShipmentService {
         );
 
         return assistantSummaryClient.summarizeException(request);
+    }
+
+    public ShipmentTrackingResponse getShipmentTracking(UUID shipmentId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFoundException(shipmentId));
+
+        Order order = orderRepository.findById(shipment.getOrderId())
+                .orElseThrow(() -> new RelatedOrderNotFoundException(shipment.getOrderId()));
+
+        return ShipmentTrackingResponse.from(shipment, order.getCustomerName());
     }
 
     private boolean isTransitionAllowed(ShipmentStatus currentStatus, ShipmentStatus targetStatus) {

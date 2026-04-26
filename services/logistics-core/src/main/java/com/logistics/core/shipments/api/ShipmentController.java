@@ -47,8 +47,8 @@ public class ShipmentController {
 
     @PatchMapping("/{shipmentId}/status")
     public ShipmentResponse updateShipmentStatus(
-            @PathVariable UUID orderId,
-            @PathVariable UUID shipmentId,
+            @PathVariable("orderId") UUID orderId,
+            @PathVariable("shipmentId") UUID shipmentId,
             @Valid @RequestBody UpdateShipmentStatusRequest request
     ) {
         try {
@@ -60,6 +60,14 @@ public class ShipmentController {
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    @GetMapping("/{shipmentId}/track")
+    public ShipmentTrackingResponse trackShipment(
+            @PathVariable("orderId") UUID orderId,
+            @PathVariable("shipmentId") UUID shipmentId
+    ) {
+        return shipmentService.getShipmentTracking(shipmentId);
     }
 
     @PostMapping("/{shipmentId}/exception-summary")

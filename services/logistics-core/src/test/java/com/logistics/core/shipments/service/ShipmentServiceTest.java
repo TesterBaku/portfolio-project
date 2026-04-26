@@ -21,7 +21,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.logistics.core.assistant.contract.AiExceptionSummaryRequest;
 import com.logistics.core.assistant.contract.AiExceptionSummaryResponse;
 import com.logistics.core.assistant.contract.AssistantSummaryClient;
+import com.logistics.core.orders.domain.Order;
+import com.logistics.core.orders.domain.OrderStatus;
+import com.logistics.core.orders.persistence.OrderRepository;
+import com.logistics.core.shipments.api.ShipmentTrackingResponse;
+import com.logistics.core.shipments.domain.RelatedOrderNotFoundException;
 import com.logistics.core.shipments.domain.Shipment;
+import com.logistics.core.shipments.domain.ShipmentNotFoundException;
 import com.logistics.core.shipments.domain.ShipmentStatus;
 import com.logistics.core.shipments.persistence.ShipmentRepository;
 
@@ -34,10 +40,17 @@ class ShipmentServiceTest {
     @Mock
     private AssistantSummaryClient assistantSummaryClient;
 
+    @Mock
+    private OrderRepository orderRepository;
+
     @Test
     void test_should_create_shipment_with_created_status() {
         UUID orderId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
         when(shipmentRepository.save(any(Shipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Shipment created = shipmentService.createShipment(orderId, "Baku", "Ganja");
@@ -52,7 +65,11 @@ class ShipmentServiceTest {
     @Test
     void test_should_list_shipments_by_order_id() {
         UUID orderId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
         List<Shipment> expected = List.of(
                 new Shipment(UUID.randomUUID(), orderId, "Baku", "Ganja", ShipmentStatus.CREATED)
         );
@@ -68,7 +85,11 @@ class ShipmentServiceTest {
     void test_should_transition_shipment_status_when_transition_is_allowed() {
         UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
         Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.CREATED);
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
@@ -84,7 +105,11 @@ class ShipmentServiceTest {
     void test_should_throw_when_transition_is_not_allowed() {
         UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
         Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.CREATED);
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.of(shipment));
@@ -101,7 +126,11 @@ class ShipmentServiceTest {
     void test_should_throw_when_shipment_not_found_for_order() {
         UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
@@ -117,7 +146,11 @@ class ShipmentServiceTest {
     void test_should_summarize_shipment_exception_with_ai_contract() {
         UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
         Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.DELAYED);
         AiExceptionSummaryResponse expected = new AiExceptionSummaryResponse(
                 "Shipment SHIP-1 delayed",
@@ -149,7 +182,11 @@ class ShipmentServiceTest {
     void test_should_throw_when_summarize_shipment_not_found_for_order() {
         UUID orderId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
-        ShipmentService shipmentService = new ShipmentService(shipmentRepository, assistantSummaryClient);
+        ShipmentService shipmentService = new ShipmentService(
+            shipmentRepository,
+            orderRepository,
+            assistantSummaryClient
+        );
 
         when(shipmentRepository.findByIdAndOrderId(eq(shipmentId), eq(orderId))).thenReturn(Optional.empty());
 
@@ -159,5 +196,73 @@ class ShipmentServiceTest {
         );
 
         assertEquals("Shipment not found for order", ex.getMessage());
+    }
+
+    @Test
+    void test_should_get_shipment_tracking_success() {
+        UUID orderId = UUID.randomUUID();
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(
+                shipmentRepository,
+                orderRepository,
+                assistantSummaryClient
+        );
+        Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.IN_TRANSIT);
+        Order order = new Order(orderId, "ACME Corp", OrderStatus.IN_PROGRESS);
+
+        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.of(shipment));
+        when(orderRepository.findById(eq(orderId))).thenReturn(Optional.of(order));
+
+        ShipmentTrackingResponse response = shipmentService.getShipmentTracking(shipmentId);
+
+        assertEquals(shipmentId, response.shipmentId());
+        assertEquals(orderId, response.orderId());
+        assertEquals("ACME Corp", response.customerName());
+        assertEquals("Baku", response.origin());
+        assertEquals("Ganja", response.destination());
+        assertEquals(ShipmentStatus.IN_TRANSIT, response.currentStatus());
+        assertEquals(1, response.events().size());
+        assertEquals(ShipmentStatus.IN_TRANSIT, response.events().get(0).status());
+    }
+
+    @Test
+    void test_should_throw_when_shipment_not_found_for_tracking() {
+        UUID shipmentId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(
+                shipmentRepository,
+                orderRepository,
+                assistantSummaryClient
+        );
+
+        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.empty());
+
+        ShipmentNotFoundException ex = assertThrows(
+                ShipmentNotFoundException.class,
+                () -> shipmentService.getShipmentTracking(shipmentId)
+        );
+
+        assertEquals("Shipment not found: " + shipmentId, ex.getMessage());
+    }
+
+    @Test
+    void test_should_throw_when_related_order_not_found_for_tracking() {
+        UUID shipmentId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        ShipmentService shipmentService = new ShipmentService(
+                shipmentRepository,
+                orderRepository,
+                assistantSummaryClient
+        );
+        Shipment shipment = new Shipment(shipmentId, orderId, "Baku", "Ganja", ShipmentStatus.IN_TRANSIT);
+
+        when(shipmentRepository.findById(eq(shipmentId))).thenReturn(Optional.of(shipment));
+        when(orderRepository.findById(eq(orderId))).thenReturn(Optional.empty());
+
+        RelatedOrderNotFoundException ex = assertThrows(
+                RelatedOrderNotFoundException.class,
+                () -> shipmentService.getShipmentTracking(shipmentId)
+        );
+
+        assertEquals("Related order not found: " + orderId, ex.getMessage());
     }
 }
