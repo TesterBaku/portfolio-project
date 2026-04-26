@@ -82,6 +82,7 @@ When editing `.agent.md` files in `.github/agents/`, use VS Code custom-agent co
 - Keep supported keys in YAML frontmatter only (`name`, `description`, optional `model`, optional `tools`).
 - Put behavioral guidance in the Markdown body after frontmatter, not in an `instructions:` frontmatter key.
 - Do not use instruction-file keys like `applyTo` in `.agent.md` files.
+- For maximum Claude/Copilot/ChatGPT portability, default to minimal frontmatter (`name`, `description`) and keep runtime/tool preferences in plain Markdown guidance.
 
 If you see warnings like "instructions not supported", normalize the file to this format.
 
