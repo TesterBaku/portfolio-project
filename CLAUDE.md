@@ -8,7 +8,7 @@
 - Use plan mode for verification steps, not just building
 - Write detailed specs upfront to reduce ambiguity
 
-### 3. Subagent Strategy
+### 2. Subagent Strategy
 - Use subagents liberally to keep main context window clean
 - Offload research, exploration, and parallel analysis to subagents
 - For complex problems, throw more compute at it via subagents
@@ -42,13 +42,42 @@
 
 ## Task Management
 
-0. **Pre-Chat Checklist:** Before starting work, review `.github/tasks/todo.md` for any pending items from prior sessions. Prioritize blocking or time-sensitive tasks.
+0. **Pre-Session Checklist:** At the start of every session, read these files in order:
+   1. `.github/tasks/lessons.md` — apply lessons from prior corrections before doing anything
+   2. `.github/tasks/todo.md` — identify pending or blocking work
+   3. `.github/instructions/development.instructions.md` — branch rules, commit format, PR policy
+   4. `.github/pull_request_template.md` — required format for every PR body
 1. **Plan First:** Write plan to `.github/tasks/todo.md` with checkable items
 2. **Verify Plan:** Check in before starting implementation
 3. **Track Progress:** Mark items complete as you go
 4. **Explain Changes:** High-level summary at each step
-5. **Document Results:** Add review section to .github/tasks/todo.md
-6. **Capture Lessons:** Update .github/tasks/lessons.md after corrections
+5. **Document Results:** Add review section to `.github/tasks/todo.md`
+6. **Capture Lessons:** Update `.github/tasks/lessons.md` after corrections
+
+---
+
+## PR Workflow
+
+Every PR follows this sequence — no shortcuts:
+
+### Opening a PR
+1. Cut branch from latest `origin/develop` (never from stale local or main):
+   ```
+   git fetch origin
+   git checkout develop && git pull --ff-only origin develop
+   git checkout -b <branch-name>
+   ```
+2. Use `.github/pull_request_template.md` as the PR body — fill every section, do not invent a different format.
+3. Mark **@Senior Developer** as the requested reviewer in the PR body (Reviewer Assignment section).
+
+### Before Merging
+4. Invoke the **Senior Developer agent** (`.github/agents/senior-developer.agent.md`) to review the PR. Do not substitute the inline `/review` skill — it does not fulfill the independent review requirement.
+5. Only merge after the agent returns **APPROVE** with no unresolved Critical or Major issues.
+
+### Merging and Cleanup
+6. Squash merge into `develop`.
+7. Delete the remote branch (use `--delete-branch` with `gh pr merge`).
+8. Pull `develop` locally (`git pull --ff-only`) and prune stale refs (`git fetch --prune`).
 
 ---
 
