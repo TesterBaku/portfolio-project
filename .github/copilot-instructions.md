@@ -7,6 +7,7 @@ This workspace uses specialized agents, consistent instructions, and reusable sk
 1. **Choosing your agent**: Type `/` in Copilot Chat to see available agents and skills.
    - Use **@Architect** for design decisions, ADRs, and system architecture.
    - Use **@Developer** for feature implementation, refactoring, and debugging.
+  - Use **@Senior Developer** for independent PR/code review and merge-readiness checks.
    - Use **@Tester** for test strategy, SDET work, and quality assurance.
 
 2. **Common workflows**: Several skills encapsulate best practices:
