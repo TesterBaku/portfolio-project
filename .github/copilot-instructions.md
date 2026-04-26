@@ -7,7 +7,7 @@ This workspace uses specialized agents, consistent instructions, and reusable sk
 1. **Choosing your agent**: Type `/` in Copilot Chat to see available agents and skills.
    - Use **@Architect** for design decisions, ADRs, and system architecture.
    - Use **@Developer** for feature implementation, refactoring, and debugging.
-  - Use **@Senior Developer** for independent PR/code review and merge-readiness checks.
+   - Use **@Senior Developer** for independent PR/code review and merge-readiness checks.
    - Use **@Tester** for test strategy, SDET work, and quality assurance.
 
 2. **Common workflows**: Several skills encapsulate best practices:
@@ -37,6 +37,13 @@ Specializes in feature implementation, debugging, refactoring, and code quality.
 - Fixing bugs
 - Code review and improvements
 - Performance optimization
+
+### @Senior Developer
+Specializes in independent PR review and quality gatekeeping. Use for:
+- Reviewing feature PRs for correctness and edge cases
+- Validating test coverage and merge readiness
+- Enforcing code quality and review standards
+- Escalating design concerns to @Architect and test strategy gaps to @Tester
 
 ### @Tester
 Specializes in test strategy, automation, and quality assurance. Use for:
@@ -123,8 +130,9 @@ If you need guidance on a specific role or task:
 
 1. **Architecture & Design**: `@Architect: <your question>`
 2. **Feature Development**: `@Developer: <your question>`
-3. **Testing & QA**: `@Tester: <your question>`
-4. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
+3. **Code Review & PR Quality Gate**: `@Senior Developer: <your question>`
+4. **Testing & QA**: `@Tester: <your question>`
+5. **Git Workflows**: `/manage-git-workflow` skill or see development.instructions.md
 
 ---
 
@@ -135,6 +143,7 @@ If you need guidance on a specific role or task:
   agents/                     # Custom agents
     architect.agent.md
     developer.agent.md
+    senior-developer.agent.md
     tester-sdet.agent.md
   instructions/               # Auto-applied guidance
     development.instructions.md
