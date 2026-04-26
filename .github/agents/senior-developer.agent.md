@@ -51,7 +51,22 @@ Work through every PR in this order:
 - [ ] No dead code, debug leftovers, or TODOs without linked issues.
 - [ ] Dependencies are justified and not overly broad.
 
-### 6. PR Hygiene
+### 6. Documentation Consistency
+**Trigger — apply this step if the PR touches any of:**
+- `.github/workflows/*.yml` (CI/CD pipeline or policy files)
+- `.github/copilot-instructions.md` or `CLAUDE.md` (AI config)
+- `.github/agents/**`, `.github/instructions/**`, `.github/skills/**` (agent, instruction, or skill files)
+- Any file under `.github/instructions/**` that documents a project convention (branch names, commit types, naming rules, PR policy)
+
+**If triggered, verify:**
+- [ ] `development.instructions.md` is updated if branch naming, PR policy, or commit conventions changed.
+- [ ] `copilot-instructions.md` is updated if agent routing, skills, or project standards changed.
+- [ ] `CLAUDE.md` is updated if Claude-specific workflow rules changed.
+- [ ] Cross-check changed config against `development.instructions.md` §Branch Strategy and §Commit Messages — no stale rules remain documented.
+
+**Verdict impact:** missing doc update on a triggered PR = **Major** issue. Flag it explicitly.
+
+### 7. PR Hygiene
 - [ ] PR is scoped to one concern.
 - [ ] Under 500 lines (flag if over, require justification if over 800).
 - [ ] Commits follow the commit message format.

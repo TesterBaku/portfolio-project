@@ -31,6 +31,18 @@ Escalation needed: [ ] None [ ] Architect [ ] Tester
 - Areas that need deep review:
 - Areas that are low risk:
 
+## Documentation Impact
+
+> **Required (not optional) if this PR touches:** `.github/workflows/*.yml`, `.github/copilot-instructions.md`, `CLAUDE.md`, `.github/agents/**`, `.github/instructions/**`, `.github/skills/**`, or any file that documents a project convention (branch names, commit types, naming rules).
+
+- [ ] No documentation impact
+- [ ] `.github/instructions/development.instructions.md` updated
+- [ ] `.github/copilot-instructions.md` updated
+- [ ] `CLAUDE.md` updated
+- [ ] Other doc updated:
+
+Notes (required if "no impact" is checked — name each trigger file type considered and why it does not apply):
+
 ## Validation
 
 - [ ] Unit tests added/updated
@@ -58,4 +70,4 @@ Escalation needed: [ ] None [ ] Architect [ ] Tester
 - [ ] Code follows development standards
 - [ ] Tests pass locally
 - [ ] No secrets, credentials, or debug leftovers
-- [ ] Docs updated where relevant
+- [ ] Documentation Impact section completed above
