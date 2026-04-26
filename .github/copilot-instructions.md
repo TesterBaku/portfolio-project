@@ -105,8 +105,12 @@ AI-related project files are first-class project artifacts and must not be left 
 ### Branch Strategy
 - `main` — Production-ready, always deployable.
 - `develop` — Integration branch for features.
-- `feature/*` — Feature branches off `develop`, one feature per branch.
+- `feature/*` — New features off `develop`.
 - `bugfix/*` — Bug fixes off `develop`.
+- `refactor/*` — Code restructuring (no behavior change) off `develop`.
+- `chore/*` — Tooling, config, and AI customization changes off `develop`.
+- `ci/*` — CI/CD workflow changes off `develop`.
+- `test/*` — Test strategy and infrastructure changes off `develop`.
 - `hotfix/*` — Critical fixes off `main`, merged back to both `main` and `develop`.
 
 See [development.instructions.md](.github/instructions/development.instructions.md) for full workflow.
