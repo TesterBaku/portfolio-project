@@ -16,10 +16,13 @@ jobs:
           if [[ "${{ github.head_ref }}" == feature/* || \
                 "${{ github.head_ref }}" == bugfix/* || \
                 "${{ github.head_ref }}" == chore/* || \
-                "${{ github.head_ref }}" == hotfix/* ]]; then
+                "${{ github.head_ref }}" == hotfix/* || \
+                "${{ github.head_ref }}" == refactor/* || \
+                "${{ github.head_ref }}" == ci/* || \
+                "${{ github.head_ref }}" == test/* ]]; then
             echo "Allowed source branch for develop."
             exit 0
           fi
 
-          echo "Only feature/*, bugfix/*, chore/*, or hotfix/* branches can target develop."
+          echo "Only feature/*, bugfix/*, chore/*, hotfix/*, refactor/*, ci/*, or test/* branches can target develop."
           exit 1
