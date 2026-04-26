@@ -14,6 +14,9 @@ Use for independent code review, PR quality gates, merge-readiness checks, and e
 ## Tester
 Use for test strategy, test implementation, CI quality gates, and reliability/flakiness analysis.
 
+## Security Review Capability
+Use `/security-review` with Senior Developer and Tester when PRs touch auth/authz, input validation, CI/workflows, Docker/runtime hardening, or dependency supply chain.
+
 ## Portability Rules
 - Keep agent behavior in Markdown prose.
 - Keep frontmatter minimal when present: `name`, `description`.
